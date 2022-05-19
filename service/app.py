@@ -2,7 +2,7 @@
 
 from http.client import OK
 from random import randint, random
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 
@@ -11,11 +11,12 @@ from flask_cors import CORS, cross_origin
 
 app = Flask(__name__, static_url_path="",
             template_folder="../build", static_folder="../build")
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://username:password@localhost:5432/default_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-CORS(app)
+
 
 
 # model
@@ -27,9 +28,6 @@ class Task(db.Model):
     def __init__(self, id, task_name):
         self.id = id
         self.task_name = task_name
-
-    def __repr__(self):
-        return '<Tasks %r>' % self.task_name
 
 
 db.create_all()
@@ -52,7 +50,7 @@ def post_todo():
     task = Task(id=randint(1, 10000), task_name=task_name)
     db.session.add(task)
     db.session.commit()
-    return (jsonify(OK))
+    return jsonify({"success": True,"response":"Task added","code":OK})
 
 
 # get routing for todos
@@ -82,9 +80,9 @@ def delete_todo(id):
     task = Task.query.get(id)
     db.session.delete(task)
     db.session.commit()
+    
 
-    return jsonify(OK)
-
+    return jsonify({"success": True, "response": "Task Deleted"})
 
 if __name__ == "__main__":
     app.run(debug=True)

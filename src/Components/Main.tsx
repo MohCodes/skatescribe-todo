@@ -1,5 +1,8 @@
 import React, { FC, ReactElement } from 'react';
+import { useSetRecoilState } from 'recoil';
 import Display from './Display';
+import todosArray from "../Atoms/todo"
+import {handlePostRequest,handleGetRequest} from "../Utilities/requestFunctions"
 
 
 
@@ -7,44 +10,30 @@ interface MainProps {
     
     
 }
- 
+
 const Main: FC<MainProps> = ({}): ReactElement => {
 
+    // recoil states
 
-    const handlePostRequest = async(data:object)=>{
-        await fetch("http://localhost:5000/postTodo",{
-            method: "POST",
-            headers : {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        })
-
-    }
-
-    const handleGetRequest = async ()=>{
-        return await fetch("http://localhost:5000/getTodo")
-    }
+    const setTasksArray = useSetRecoilState(todosArray)
 
 
-
-    const handleSubmit = (e: React.FormEvent<EventTarget>):void=>{
-        
-        
+    const handleFormSubmit = (e: React.FormEvent<EventTarget>):void=>{
         let taskInput = document.getElementById("task") as HTMLInputElement
-        let taskInputText = taskInput.value
+        let taskInputText:string = taskInput.value
         if(taskInputText=== ""){
             return alert("enter a task")
         }
-
-        let data = {task:taskInputText}
+        let data:object = {task:taskInputText}
+        taskInput.value = ""
         
-        console.log(JSON.stringify(data))
         handlePostRequest(data)
-        .then(res => {console.log(res)})
         .catch(err=>console.log(err))
-        taskInput.value = " "
 
         handleGetRequest()
-        .then(res=>res.json).then(data=>console.log(data))
+        .then(res=>{
+            setTasksArray((res.tasks))   
+        })
         .catch(err=>console.log(err))
 
     }
@@ -70,7 +59,7 @@ const Main: FC<MainProps> = ({}): ReactElement => {
                         </div>
 
 
-                        <button onClick={handleSubmit} type="button" className="btn btn-outline-primary bg-primary 
+                        <button onClick={handleFormSubmit} type="button" className="btn btn-outline-primary bg-primary 
                                 mx-4 mt-4 font-weight-bold text-white"> Submit</button>
 
                     </form>
@@ -82,5 +71,5 @@ const Main: FC<MainProps> = ({}): ReactElement => {
         </>
     );
 }
- 
+
 export default Main;

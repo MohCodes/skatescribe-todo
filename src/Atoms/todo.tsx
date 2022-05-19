@@ -6,7 +6,7 @@ export interface Todo{
 
 const todosArray = atom({
     key:"todosArray",
-    default: [] as Todo[]
+    default: []
 })
 
 export default todosArray
