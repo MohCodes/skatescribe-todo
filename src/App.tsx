@@ -10,7 +10,7 @@ function App() {
   return (
     <RecoilRoot>
       <div className="App d-flex flex-column">
-        <Header/>
+        {/* <Header/> */}
         <Main/>
       </div>
     </RecoilRoot>

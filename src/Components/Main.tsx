@@ -1,5 +1,5 @@
-import React, { FC, ReactElement } from 'react';
-import { useSetRecoilState } from 'recoil';
+import React, { FC, ReactElement, useEffect,useState } from 'react';
+import { useRecoilState } from 'recoil';
 import Display from './Display';
 import todosArray from "../Atoms/todo"
 import {handlePostRequest,handleGetRequest} from "../Utilities/requestFunctions"
@@ -15,10 +15,10 @@ const Main: FC<MainProps> = ({}): ReactElement => {
 
     // recoil states
 
-    const setTasksArray = useSetRecoilState(todosArray)
+    const [tasksArray,setTasksArray] = useRecoilState(todosArray)
 
 
-    const handleFormSubmit = (e: React.FormEvent<EventTarget>):void=>{
+    const handleFormSubmit = async (e: React.FormEvent<EventTarget>):Promise<any>=>{
         let taskInput = document.getElementById("task") as HTMLInputElement
         let taskInputText:string = taskInput.value
         if(taskInputText=== ""){
@@ -27,16 +27,20 @@ const Main: FC<MainProps> = ({}): ReactElement => {
         let data:object = {task:taskInputText}
         taskInput.value = ""
         
-        handlePostRequest(data)
+        await handlePostRequest(data)
         .catch(err=>console.log(err))
 
-        handleGetRequest()
+        await handleGetRequest()
         .then(res=>{
-            setTasksArray((res.tasks))   
+            setTasksArray((res.tasks))
         })
         .catch(err=>console.log(err))
 
     }
+
+    useEffect(()=>{
+
+    },[tasksArray])
 
 
 
@@ -44,14 +48,14 @@ const Main: FC<MainProps> = ({}): ReactElement => {
 
     return (  
         <>
-            <div className='container
-                            h-100 d-flex flex-column 
-                            justify-content-start bg-info mb-3 rounded'>
+            <div className='container shadow-lg
+                            h-100 mw-75 d-flex flex-column mt-5
+                            justify-content-start bg-primary px-0  mb-3 rounded'>
 
-                <div className='inputContainer d-flex h-25 mt-5 
-                                justify-content-center align-items-center rounded '>
+                <div className='inputContainer d-flex h-25 mt-0 bg-white 
+                                justify-content-center align-items-center rounded  '>
 
-                    <form autoComplete='off' className=' todoForm mw-75 h-100 d-flex justify-content-center align-items-center'>
+                    <form  onSubmit={e => { e.preventDefault(); }} autoComplete='off' className=' todoForm w-100 h-100 d-flex justify-content-center align-items-center'>
 
                         <div className='d-flex flex-column h-100 justify-content-center mb-1'>
                             <label htmlFor="task"> Enter Task</label>
