@@ -2,9 +2,11 @@
 
 from http.client import OK
 from random import randint, random
-from flask import Flask, jsonify, make_response, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request,abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from flask_socketio import SocketIO
+
 
 
 # db/ flask initilization
@@ -15,7 +17,9 @@ CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://username:password@localhost:5432/default_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'secret!'
 db = SQLAlchemy(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 
@@ -23,11 +27,13 @@ db = SQLAlchemy(app)
 class Task(db.Model):
     __tablename__ = 'Tasks'
     id = db.Column(db.Integer, primary_key=True)
-    task_name = db. Column(db.String(100), nullable=False)
+    task_name = db.Column(db.String(100), nullable=False)
+    edit = db.Column(db.Boolean, unique=False, default=False)
 
-    def __init__(self, id, task_name):
+    def __init__(self, id, task_name,edit):
         self.id = id
         self.task_name = task_name
+        self.edit = edit
 
 
 db.create_all()
@@ -43,11 +49,10 @@ def index():
 
 # post routing for todos
 @cross_origin()
-@app.route("/postTodo", methods=["POST"])
+@app.route("/todos", methods=["POST"])
 def post_todo():
-    todo_data = request.json
-    task_name = todo_data['task']
-    task = Task(id=randint(1, 10000), task_name=task_name)
+    task_name = request.json['task']
+    task = Task(id=randint(1, 10000), task_name=task_name,edit=False)
     db.session.add(task)
     db.session.commit()
     return jsonify({"success": True,"response":"Task added","code":OK})
@@ -55,7 +60,7 @@ def post_todo():
 
 # get routing for todos
 @cross_origin()
-@app.route("/getTodo", methods=["GET"])
+@app.route("/todos", methods=["GET"])
 def get_todo():
     all_todos = []
     todos = Task.query.all()
@@ -63,9 +68,11 @@ def get_todo():
         results = {
             "task_id": task.id,
             "task_task_name": task.task_name,
+            "task_edit":task.edit,
         }
         all_todos.append(results)
 
+    # socketio.emit('some event',all_todos,broadcast=True)
     return jsonify({
         "success": True,
         "tasks": all_todos,
@@ -73,9 +80,27 @@ def get_todo():
     })
 
 
+
+#PATCH routing for todos
+@cross_origin()
+@app.route("/todos/<id>", methods=["PATCH"])
+def patch_todo(id):
+    task = Task.query.get(id)
+    task_name = request.json["task_name"]
+
+    if task is None:
+        abort(404)
+    else:
+        task.task_name = task_name
+        db.session.add(task)
+        db.session.commit()
+        return jsonify ({"code":OK, "response":"Task details Updated"})
+
+
+
 # delete routing for todos
 @cross_origin()
-@app.route("/deleteTodo/<id>", methods=["DELETE"])
+@app.route("/todos/<id>", methods=["DELETE"])
 def delete_todo(id):
     task = Task.query.get(id)
     db.session.delete(task)
@@ -84,5 +109,13 @@ def delete_todo(id):
 
     return jsonify({"success": True, "response": "Task Deleted"})
 
+
+
+
+
+
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    socketio.run(app,debug=True)
