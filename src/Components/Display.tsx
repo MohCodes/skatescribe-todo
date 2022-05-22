@@ -41,7 +41,7 @@ const handleTaskDelete = async (e: React.ChangeEvent<HTMLInputElement>):Promise<
 const handleTaskClick = (e: React.MouseEvent<HTMLElement>)=>{
 
     const target = e.target as HTMLElement
- 
+
     if(target.style.color == ""){
         target.style.color = "grey"
         target.style.textDecoration ="line-through"
@@ -62,7 +62,24 @@ const handleTaskEditClick = (e: React.MouseEvent<HTMLElement>)=>{
         return item.task_id === taskId? {...item, "task_edit" : true}: item
     })
     setTasksArray(Newtasks)
-    console.log(Newtasks)
+    console.log(tasksArray)
+}
+
+const handleTaskEditSubmit = async ( e: React.MouseEvent<HTMLElement>):Promise<any>=>{
+    const taskEditInputElement = e.currentTarget.parentElement
+                                .parentElement.previousElementSibling
+                                .firstElementChild as HTMLInputElement
+
+    if(!taskEditInputElement.value){
+        return alert("Enter Task")
+    }
+    const newTaskName = taskEditInputElement.value 
+    const taskId = parseInt(e.currentTarget.id)
+    const newTaskObj = {"task_name": newTaskName}
+    await handlePatchRequest(taskId, newTaskObj)
+    await handleGetRequest().then(res=>setTasksArray(res.tasks))
+
+
 }
 
 
@@ -75,7 +92,7 @@ let todoListDisplay =  tasksArray.map((tasks,index)=>{
         <div key = {index} className = "todocontainer shadow-sm border border-secondary / d-flex justify-content-between align-items-center w-100 rounded mb-2">
 
         {tasks.task_edit?
-        <TodoEdit taskId={tasks.task_id} taskName={tasks.task_task_name} deleteTask={handleDeleteRequest}/>
+        <TodoEdit submitChange={handleTaskEditSubmit} taskId={tasks.task_id} taskName={tasks.task_task_name} deleteTask={handleTaskDelete}/>
         :
                 
         <TodoCard editTask={handleTaskEditClick} completeTask={handleTaskClick} 

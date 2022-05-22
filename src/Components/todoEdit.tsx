@@ -9,13 +9,14 @@ interface TodoEditProps {
     taskId: string,
     taskName: string,
     deleteTask: any,
+    submitChange:any,
     
 
  
 
 }
 
-const TodoEdit: FC<TodoEditProps> = ({taskName,taskId,deleteTask}): ReactElement => {
+const TodoEdit: FC<TodoEditProps> = ({taskId,deleteTask,submitChange}): ReactElement => {
 
     //recoil state
     const [tasksArray,setTasksArray] = useRecoilState(todosArray)
@@ -29,13 +30,13 @@ const TodoEdit: FC<TodoEditProps> = ({taskName,taskId,deleteTask}): ReactElement
 
         
             <div  className='todoName d-flex justify-content-start align-items-center p-3 w-75' >
-                <input id={"input"+taskId} className=" mb-0 p-1 px-2" type = "text"></input>
+                <input required id={"input"+taskId} className=" mb-0 p-1 px-2" type = "text"></input>
                 </div>
                 <div className='buttonsContainer d-flex flex-row justify-content-end '>
 
                         <div className=' editButtonContainer  w-25 h-100 d-flex 
                             justify-content-end align-items-center'>
-                            <button onClick={deleteTask} id= {taskId} type='button' className=' mx-4 btn btn-success' >OK</button>
+                            <button onClick={submitChange} id= {taskId} type='button' className=' mx-4 btn btn-success' >OK</button>
                         </div>
 
 
