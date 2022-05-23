@@ -1,22 +1,23 @@
 
-
-from http.client import OK
-from random import randint
+from datetime import datetime
 from flask import Flask, jsonify, render_template, request,abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
-from datetime import datetime
+from http.client import OK
+from random import randint
 
 
 
 
-# db/ flask initilization
 
+# db/cors/socket/ flask initilization
 app = Flask(__name__, static_url_path="",
             template_folder="../build", static_folder="../build")
 CORS(app)
 
+
+#psycopg2 postgres python adapter
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://username:password@localhost:5432/default_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'secret!'
@@ -76,7 +77,6 @@ def get_todo():
             "task_date":task.date
         }
         all_todos.append(results)
-    sorted_results = all_todos.sort(key=lambda item:item["task_date"],reverse=True)
 
     # socketio.emit('some event',all_todos,broadcast=True)
     return jsonify({
@@ -112,13 +112,7 @@ def delete_todo(id):
     db.session.delete(task)
     db.session.commit()
     
-
     return jsonify({"success": True, "response": "Task Deleted"})
-
-
-
-
-
 
 
 

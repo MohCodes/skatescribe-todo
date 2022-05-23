@@ -11,7 +11,7 @@ export const socket = io('http://localhost:5000/');
 function App() {
   return (
     <RecoilRoot>
-      <div className="App d-flex flex-column">
+      <div className="App d-flex flex-column " style={{height: "100vh"}}>
         <Main/>
       </div>
     </RecoilRoot>
