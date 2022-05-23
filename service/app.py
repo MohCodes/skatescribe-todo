@@ -1,11 +1,13 @@
 
 
 from http.client import OK
-from random import randint, random
-from flask import Flask, jsonify, make_response, render_template, request,abort
+from random import randint
+from flask import Flask, jsonify, render_template, request,abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
+from datetime import datetime
+
 
 
 
@@ -29,11 +31,13 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_name = db.Column(db.String(100), nullable=False)
     edit = db.Column(db.Boolean, unique=False, default=False)
+    date = db.Column(db.DateTime, nullable = False)
 
-    def __init__(self, id, task_name,edit):
+    def __init__(self, id, task_name,edit,date):
         self.id = id
         self.task_name = task_name
         self.edit = edit
+        self.date= date
 
 
 db.create_all()
@@ -52,7 +56,7 @@ def index():
 @app.route("/todos", methods=["POST"])
 def post_todo():
     task_name = request.json['task']
-    task = Task(id=randint(1, 10000), task_name=task_name,edit=False)
+    task = Task(id=randint(1, 10000), task_name=task_name,edit=False,date=datetime.now())
     db.session.add(task)
     db.session.commit()
     return jsonify({"success": True,"response":"Task added","code":OK})
@@ -69,8 +73,10 @@ def get_todo():
             "task_id": task.id,
             "task_task_name": task.task_name,
             "task_edit":task.edit,
+            "task_date":task.date
         }
         all_todos.append(results)
+    sorted_results = all_todos.sort(key=lambda item:item["task_date"],reverse=True)
 
     # socketio.emit('some event',all_todos,broadcast=True)
     return jsonify({
