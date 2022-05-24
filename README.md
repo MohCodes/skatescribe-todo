@@ -2,11 +2,11 @@
 
   -run postgres docker instance <br/>
 
-        `docker compose up -d ` <br/> <br/>
+        `docker compose up -d `
 
   -run server <br/>
 
-        `cd service` <br/>
-        `python3 app.py`<br/>
+        `cd service`
+        `python3 app.py`
 
 - go to localhost:5000
