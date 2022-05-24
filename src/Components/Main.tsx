@@ -4,6 +4,7 @@ import Display from './Display';
 import todosArray from "../Atoms/todo"
 import {handlePostRequest,handleGetRequest} from "../Utilities/requestFunctions"
 import TaskInputForm from './TaskInputForm';
+import {socket} from "./Display"
 
 
 
@@ -17,6 +18,19 @@ const Main: FC<MainProps> = ({}): ReactElement => {
     // recoil states
     const [tasksArray,setTasksArray] = useRecoilState(todosArray)
 
+    const socketListener = ()=>{
+        socket.emit("updateData")
+        const handler = (data:any)=>{
+            let jsonData = JSON.parse(data)
+            setTasksArray(jsonData.tasks)
+            
+        }
+    
+        socket.on("tasks", handler);
+    
+        return () => socket.off("tasks", handler);
+            
+        }
 
     //form submit
     const handleFormSubmit = async (e: React.FormEvent<EventTarget>):Promise<any>=>{
@@ -39,6 +53,7 @@ const Main: FC<MainProps> = ({}): ReactElement => {
             setTasksArray((res.tasks))
         })
         .catch(err=>console.log(err))
+        socketListener()
 
     }
 

@@ -27,3 +27,12 @@ export const handlePatchRequest = async(id:number, data:object)=>{
     })
     return fetchRequest.json()
 }
+
+export const handlePatchEditRequest = async(id:number, state:boolean)=>{
+    let fetchRequest = await fetch(`http://localhost:5000/todos/edit/${id}`,{
+        method: 'PATCH',
+        headers : {'Content-Type': 'application/json'},
+        body: JSON.stringify({"task_edit":state})
+    })
+    return fetchRequest.json()
+}

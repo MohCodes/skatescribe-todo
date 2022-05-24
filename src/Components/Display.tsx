@@ -2,13 +2,14 @@ import React, { FC, ReactElement, useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import TodoCard from './TodoCard';
 import todosArray from '../Atoms/todo'
-import {handleDeleteRequest,handleGetRequest,handlePatchRequest} from  "../Utilities/requestFunctions"
+import {handleDeleteRequest,handleGetRequest,handlePatchRequest,handlePatchEditRequest} from  "../Utilities/requestFunctions"
 import TodoEdit from './todoEdit';
 import {handleTaskClick} from "../Utilities/taskClickFunction"
 import {Socket, io} from 'socket.io-client';
 
 
-const socket: any  = io()
+
+export const socket:any  = io()
 socket.connect("http://localhost:5000")
 
 
@@ -26,20 +27,36 @@ const [tasksArray,setTasksArray] = useRecoilState(todosArray)
 
 
 //initial GET request
+ const socketListener = ()=>{
+    socket.emit("updateData")
+    const handler = (data:any)=>{
+        let jsonData = JSON.parse(data)
+        setTasksArray(jsonData.tasks)
+        
+    }
+
+    socket.on("tasks", handler);
+
+    return () => socket.off("tasks", handler);
+
+
+}
 
 useEffect(()=>{
         handleGetRequest().then(res=>{
             setTasksArray(res.tasks)
         })
-        socket.on('connect',(message:any) =>{
-            socket.send("connected")
-        })
-        socket.on("message",(msg:any)=>{
-            console.log(msg)
-            setTasksArray(msg.tasks)
-            socket.send("a")
-        })
-        
+
+
+        const handler = (data:any)=>{
+            let jsonData = JSON.parse(data)
+            setTasksArray(jsonData.tasks)
+            
+        }
+    
+        socket.on("tasks", handler);
+        socket.emit("updateData")
+
 },[])
 
 
@@ -49,17 +66,18 @@ useEffect(()=>{
 const handleTaskDelete = async (e: React.ChangeEvent<HTMLInputElement>):Promise<any>=>{
     let taskId = parseInt(e.target.id)
     await handleDeleteRequest(taskId)
+    socketListener()
     await handleGetRequest().then(res=>{setTasksArray(res.tasks)})
+    
 }
 
 
 //handle task edit
-const handleTaskEditClick = (e: React.MouseEvent<HTMLElement>)=>{
+const handleTaskEditClick = async (e: React.MouseEvent<HTMLElement>):Promise<any>=>{
     const taskId = parseInt(e.currentTarget.id)
-    let Newtasks = tasksArray.map(item=>{
-        return item.task_id === taskId? {...item, "task_edit" : true}: item
-    })
-    setTasksArray(Newtasks)
+    await handlePatchEditRequest(taskId,true)
+    await handleGetRequest().then(res=>setTasksArray(res.tasks))
+    socketListener()
     console.log(tasksArray)
 }
 
@@ -75,7 +93,10 @@ const handleTaskEditSubmit = async ( e: React.MouseEvent<HTMLElement>):Promise<a
     const taskId = parseInt(e.currentTarget.id)
     const newTaskObj = {"task_name": newTaskName}
     await handlePatchRequest(taskId, newTaskObj)
+    await handlePatchEditRequest(taskId,false)
     await handleGetRequest().then(res=>setTasksArray(res.tasks))
+    socketListener()
+
 }
 
 

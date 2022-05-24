@@ -88,8 +88,8 @@ def get_todo():
         "total_tasks": len(todos)
     })
 
-@socketio.on("message")
-def handle_message(msg):
+@socketio.on("updateData")
+def handle_event():
     all_todos = []
     todos = Task.query.all()
     for task in todos:
@@ -100,13 +100,15 @@ def handle_message(msg):
             "task_date":task.date
         }
         all_todos.append(results)
-    socketio.send(json.dumps({"tasks":all_todos}, indent=4, sort_keys=True, default=str))
+    emit("tasks",json.dumps({"tasks":all_todos}, indent=4, sort_keys=True, default=str),broadcast=True)
+
+
 
 
 #PATCH routing for todos
 @cross_origin()
 @app.route("/todos/<id>", methods=["PATCH"])
-def patch_todo(id):
+def patch_todo_name(id):
     task = Task.query.get(id)
     task_name = request.json["task_name"]
 
@@ -117,6 +119,22 @@ def patch_todo(id):
         db.session.add(task)
         db.session.commit()
         return jsonify ({"code":OK, "response":"Task details Updated"})
+
+#patch edit route
+@cross_origin()
+@app.route("/todos/edit/<id>", methods=["PATCH"])
+def patch_todo_edit(id):
+    task = Task.query.get(id)
+    task_edit = request.json["task_edit"]
+
+    if task is None:
+        abort(404)
+    else:
+        task.edit = task_edit
+        db.session.add(task)
+        db.session.commit()
+        return jsonify ({"code":OK, "response":"Task details Updated"})
+
 
 
 
