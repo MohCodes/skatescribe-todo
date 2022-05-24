@@ -67,7 +67,8 @@ const handleTaskDelete = async (e: React.ChangeEvent<HTMLInputElement>):Promise<
     let taskId = parseInt(e.target.id)
     await handleDeleteRequest(taskId)
     socketListener()
-    await handleGetRequest().then(res=>{setTasksArray(res.tasks)})
+    await handleGetRequest().then(res=>{
+        setTasksArray(res.tasks)})
     
 }
 
@@ -75,9 +76,11 @@ const handleTaskDelete = async (e: React.ChangeEvent<HTMLInputElement>):Promise<
 //handle task edit
 const handleTaskEditClick = async (e: React.MouseEvent<HTMLElement>):Promise<any>=>{
     const taskId = parseInt(e.currentTarget.id)
+ 
     await handlePatchEditRequest(taskId,true)
     await handleGetRequest().then(res=>setTasksArray(res.tasks))
     socketListener()
+    
     console.log(tasksArray)
 }
 

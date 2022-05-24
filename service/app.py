@@ -67,10 +67,11 @@ def post_todo():
     return jsonify({"success": True,"response":"Task added","code":OK})
 
 
+
 # get routing for todos
 @cross_origin()
 @app.route("/todos", methods=["GET"])
-def get_todo():
+def get_request():
     all_todos = []
     todos = Task.query.all()
     for task in todos:
@@ -81,6 +82,7 @@ def get_todo():
             "task_date":task.date
         }
         all_todos.append(results)
+        
     
     return jsonify({
         "success": True,
@@ -100,6 +102,7 @@ def handle_event():
             "task_date":task.date
         }
         all_todos.append(results)
+
     emit("tasks",json.dumps({"tasks":all_todos}, indent=4, sort_keys=True, default=str),broadcast=True)
 
 
