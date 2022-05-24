@@ -1,9 +1,11 @@
 
 from datetime import datetime
+from gc import callbacks
+import json
 from flask import Flask, jsonify, render_template, request,abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit,send
 from http.client import OK
 from random import randint
 
@@ -45,6 +47,8 @@ db.create_all()
 db.session.commit()
 
 
+
+
 # index routing
 
 @app.route("/")
@@ -77,14 +81,26 @@ def get_todo():
             "task_date":task.date
         }
         all_todos.append(results)
-
-    # socketio.emit('some event',all_todos,broadcast=True)
+    
     return jsonify({
         "success": True,
         "tasks": all_todos,
         "total_tasks": len(todos)
     })
 
+@socketio.on("message")
+def handle_message(msg):
+    all_todos = []
+    todos = Task.query.all()
+    for task in todos:
+        results = {
+            "task_id": task.id,
+            "task_task_name": task.task_name,
+            "task_edit":task.edit,
+            "task_date":task.date
+        }
+        all_todos.append(results)
+    socketio.send(json.dumps({"tasks":all_todos}, indent=4, sort_keys=True, default=str))
 
 
 #PATCH routing for todos

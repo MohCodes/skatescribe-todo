@@ -24,7 +24,7 @@ const TaskInputForm: FC<TaskInputFormProps> = ({formSubmit}): ReactElement => {
 
                 <div className='d-flex flex-column mw-25 h-100 justify-content-center '>
                     <label htmlFor="task"> Enter Task</label>
-                    <input placeholder='Enter a Task :)' id="task" name="task" type="text" className='rounded border 
+                    <input placeholder='Enter a Task' id="task" name="task" type="text" className='rounded border 
                     border-secondary w-100 form-control input-sm mt-2'></input>
                 </div>
 

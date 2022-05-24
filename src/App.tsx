@@ -3,10 +3,7 @@ import { RecoilRoot } from 'recoil';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Main from './Components/Main';
-import io from 'socket.io-client';
 
-
-export const socket = io('http://localhost:5000/');
 
 function App() {
   return (

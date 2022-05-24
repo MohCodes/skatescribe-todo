@@ -5,11 +5,17 @@ import todosArray from '../Atoms/todo'
 import {handleDeleteRequest,handleGetRequest,handlePatchRequest} from  "../Utilities/requestFunctions"
 import TodoEdit from './todoEdit';
 import {handleTaskClick} from "../Utilities/taskClickFunction"
+import {Socket, io} from 'socket.io-client';
+
+
+const socket: any  = io()
+socket.connect("http://localhost:5000")
 
 
 
 
 interface DisplayProps {
+
     
 }
 
@@ -25,7 +31,18 @@ useEffect(()=>{
         handleGetRequest().then(res=>{
             setTasksArray(res.tasks)
         })
+        socket.on('connect',(message:any) =>{
+            socket.send("connected")
+        })
+        socket.on("message",(msg:any)=>{
+            console.log(msg)
+            setTasksArray(msg.tasks)
+            socket.send("a")
+        })
+        
 },[])
+
+
 
 
 //handle task delete
@@ -80,8 +97,6 @@ let todoListDisplay =  tasksArray.map((tasks,index)=>{
         </div>
         )
 })
-
-
 
 
 
